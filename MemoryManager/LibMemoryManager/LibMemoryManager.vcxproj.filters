@@ -6,4 +6,12 @@
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\MemoryManager.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Hook.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>

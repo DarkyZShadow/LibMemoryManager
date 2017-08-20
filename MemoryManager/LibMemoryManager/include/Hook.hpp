@@ -2,24 +2,22 @@
 #ifndef __LMM_HOOK_HPP__
 #define __LMM_HOOK_HPP__
 
-#include <vector>
-#include <iostream>
 #include <Windows.h>
 
-typedef DWORD				address_t;
+typedef DWORD					address_t;
 
-#define TO_ADDY(addy)		reinterpret_cast<address_t>(addy)
-#define TO_PADDY(addy)		reinterpret_cast<address_t*>(addy)
+#define TO_ADDY(addy)			reinterpret_cast<address_t>(addy)
+#define TO_PADDY(addy)			reinterpret_cast<address_t*>(addy)
 
-class						Hook
+class							Hook
 {
 	private:
-		bool				isHooked;
-		size_t				hookSize;
-		address_t			origFunction;
-		address_t			newFunction;
-		byte				*origBytes;
-		byte				*patch;
+		bool					isHooked;
+		size_t					hookSize;
+		address_t				origFunction;
+		address_t				newFunction;
+		byte					*origBytes;
+		byte					*patch;
 
 	public:
 		Hook(address_t origFunction, address_t newFunction, size_t hookSize)
@@ -44,9 +42,9 @@ class						Hook
 			delete[] origBytes;
 		}
 
-		bool				hook()
+		bool					hook()
 		{
-			DWORD			oldProtect;
+			DWORD				oldProtect;
 
 			if (this->isHooked || this->hookSize < 10)
 				return false;
@@ -72,9 +70,9 @@ class						Hook
 			return true;
 		}
 
-		bool				unhook()
+		bool					unhook()
 		{
-			DWORD			oldProtect;
+			DWORD				oldProtect;
 
 			if (!this->isHooked)
 				return false;
