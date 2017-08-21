@@ -2,26 +2,34 @@
 #ifndef __LMM_HOOK_HPP__
 #define __LMM_HOOK_HPP__
 
+#include <vector>
 #include <Windows.h>
 
-typedef DWORD					address_t;
+typedef DWORD						address_t;
+typedef std::vector<address_t>		address_list_t;
 
-#define TO_ADDY(addy)			reinterpret_cast<address_t>(addy)
-#define TO_PADDY(addy)			reinterpret_cast<address_t*>(addy)
+#define TO_ADDY(addy)				reinterpret_cast<address_t>(addy)
+#define TO_PADDY(addy)				reinterpret_cast<address_t*>(addy)
 
-class							Hook
+class								Hook
 {
 	private:
-		bool					isHooked;
-		size_t					hookSize;
-		address_t				origFunction;
-		address_t				newFunction;
 		byte					*origBytes;
-		byte					*patch;
+		bool						isHooked;
+		size_t						hookSize;
+		address_t					origFunction;
+		address_t					newFunction;
+		byte						*patch;
 
 	public:
 		Hook(address_t origFunction, address_t newFunction, size_t hookSize)
 		{
+			if (isAlreadyHooked(origFunction))
+			{
+				this->hookSize = 0;
+				return;
+			}
+
 			this->origFunction = origFunction;
 			this->newFunction = newFunction;
 			this->hookSize = hookSize;
@@ -70,9 +78,9 @@ class							Hook
 			return true;
 		}
 
-		bool					unhook()
+		bool						unhook()
 		{
-			DWORD				oldProtect;
+			DWORD					oldProtect;
 
 			if (!this->isHooked)
 				return false;
@@ -90,6 +98,18 @@ class							Hook
 
 			this->isHooked = false;
 			return true;
+		}
+
+	private:
+		bool						isAlreadyHooked(address_t addy)
+		{
+			static address_list_t	hooked_addies;
+
+			for (auto hooked_addy : hooked_addies)
+				if (hooked_addy == addy)
+					return true;
+			hooked_addies.push_back(addy);
+			return false;
 		}
 };
 
