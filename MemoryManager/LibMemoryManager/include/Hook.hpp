@@ -41,12 +41,21 @@ class								Hook
 
 			this->trampoline[0] = 0x60; /* PUSHAD opcode */
 			this->trampoline[1] = 0x9C; /* PUSHFD opcode */
-			this->trampoline[2] = 0xE8; /* CALL opcode */
-			this->trampoline[7] = 0x9D; /* POPFD opcode */
-			this->trampoline[8] = 0x61; /* POPAD opcode */
-			this->trampoline[hookSize + 9] = 0xE9; /* JMP opcode */
-			*TO_PADDY(&this->trampoline[3]) = newFunction - TO_ADDY(this->trampoline) - 7; /* Call new function */
-			*TO_PADDY(&this->trampoline[hookSize + 10]) = origFunction - TO_ADDY(this->trampoline) - 14; /* JMP return to origFunction - 9 */
+			/* 8B6C24 10        MOV EBP,DWORD PTR SS:[ESP+10] */
+			this->trampoline[2] = 0x8B;
+			this->trampoline[3] = 0x6C;
+			this->trampoline[4] = 0x24;
+			this->trampoline[5] = 0x10;
+			/* 83ED 04        	SUB EBP, 4 */
+			this->trampoline[6] = 0x83;
+			this->trampoline[7] = 0xED;
+			this->trampoline[8] = 0x04;
+			this->trampoline[9] = 0xE8; /* CALL opcode */
+			this->trampoline[14] = 0x9D; /* POPFD opcode */
+			this->trampoline[15] = 0x61; /* POPAD opcode */
+			this->trampoline[hookSize + 16] = 0xE9; /* JMP opcode */
+			*TO_PADDY(&this->trampoline[10]) = newFunction - TO_ADDY(this->trampoline) - 14; /* Call new function */
+			*TO_PADDY(&this->trampoline[hookSize + 17]) = origFunction - TO_ADDY(this->trampoline) - 21; /* JMP return to origFunction */
 			*TO_PADDY(&this->patch[1]) = TO_ADDY(this->trampoline) - origFunction - 5; /* to - from - 5 (JMP size) */ 
 		}
 
@@ -65,7 +74,7 @@ class								Hook
 				return false;
 
 			/* Modify 'trampoline' protection */
-			if (!VirtualProtect(this->trampoline, hookSize + 14, PAGE_EXECUTE_READWRITE, &trampOldProtect))
+			if (!VirtualProtect(this->trampoline, hookSize + 21, PAGE_EXECUTE_READWRITE, &trampOldProtect))
 				return false;
 
 			/* Modify 'origFunction' protection */
@@ -73,7 +82,7 @@ class								Hook
 				return false;
 
 			/* Save old bytes */
-			memcpy(this->trampoline + 9, (LPVOID)this->origFunction, this->hookSize);
+			memcpy(this->trampoline + 16, (LPVOID)this->origFunction, this->hookSize);
 
 			/* NOP hook location */
 			memset((LPVOID)this->origFunction, 0x90, this->hookSize);
@@ -101,14 +110,14 @@ class								Hook
 				return false;
 
 			/* Restore old bytes */
-			memcpy((void*)this->origFunction, this->trampoline + 9, this->hookSize);
+			memcpy((void*)this->origFunction, this->trampoline + 16, this->hookSize);
 
 			/* Restore protection */
 			if (!VirtualProtect((LPVOID)this->origFunction, hookSize, oldProtect, &oldProtect))
 				return false;
 
 			/* Restore 'trampoline' protection */
-			if (!VirtualProtect(this->trampoline, hookSize + 14, trampOldProtect, &trampOldProtect))
+			if (!VirtualProtect(this->trampoline, hookSize + 21, trampOldProtect, &trampOldProtect))
 				return false;
 
 			this->isHooked = false;

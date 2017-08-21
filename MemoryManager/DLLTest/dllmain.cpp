@@ -4,15 +4,25 @@
 
 #pragma region New Functions
 
-void __declspec(naked)			newSend()
+void __declspec(naked)			newSend(SOCKET s, const char *buf, int len, int flags)
 {
-	std::cout << "New Send !" << std::endl;
+	std::cout << "New Send :" << std::endl;
+	std::cout << "- Socket : " << s << std::endl;
+	std::cout << "- Buffer : " << TO_ADDY(buf) << std::endl;
+	std::cout << "- Size : " << len << std::endl;
+	std::cout << "- Flags : " << flags << std::endl;
+	std::cout << std::endl;
 	__asm RET;
 }
 
-void __declspec(naked)			newRecv()
+void __declspec(naked)			newRecv(SOCKET s, char *buf, int len, int flags)
 {
-	std::cout << "New Recv !" << std::endl;
+	std::cout << "New Recv :" << std::endl;
+	std::cout << "- Socket : " << s << std::endl;
+	std::cout << "- Buffer : " << TO_ADDY(buf) << std::endl;
+	std::cout << "- Size : " << len << std::endl;
+	std::cout << "- Flags : " << flags << std::endl;
+	std::cout << std::endl;
 	__asm RET;
 }
 
